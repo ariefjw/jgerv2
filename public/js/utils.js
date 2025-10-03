@@ -1,5 +1,3 @@
-// utils.js - Shared utilities
-
 // Konfigurasi opsi agar mudah diubah
 const CONFIG = {
   jenisJamu: [
@@ -174,6 +172,20 @@ Catatan: ${data.notes ? data.notes : "-"}
 Lanjutkan menyimpan order?`;
 }
 
+// Function untuk load data edit ketika kembali ke halaman input
+function loadEditData() {
+  const editData = localStorage.getItem('editOrderData');
+  if (editData) {
+    return JSON.parse(editData);
+  }
+  return null;
+}
+
+// Function untuk clear data edit setelah digunakan
+function clearEditData() {
+  localStorage.removeItem('editOrderData');
+}
+
 // Export functions untuk digunakan di file lain
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -187,6 +199,8 @@ if (typeof module !== 'undefined' && module.exports) {
     createItemRow,
     formatBatchWeekOfMonth,
     loadRecentBatches,
-    formatOrderSummary
+    formatOrderSummary,
+    loadEditData,
+    clearEditData
   };
 }

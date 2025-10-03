@@ -805,3 +805,19 @@ table tbody td {
     min-width: 80px;
   }
 }
+
+/* Mobile styles untuk customers table */
+@media (max-width: 768px) {
+  .mobile-customer-cards {
+    display: flex;
+  }
+  
+  #customersTable {
+    display: none !important;
+  }
+  
+  /* Sembunyikan thead pada mobile */
+  #customersTable thead {
+    display: none !important;
+  }
+}

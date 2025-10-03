@@ -17,30 +17,6 @@
       <a href="/stock.html">Stok</a>
     </nav>
 
-    <!-- Modal Edit Order -->
-    <div id="editModal" class="modal">
-      <div class="modal-content">
-        <h2>Edit Order</h2>
-        <form id="editForm" novalidate>
-          <input type="hidden" id="editCustomerName" />
-          <div class="full">
-            <label for="editNotes">Catatan</label>
-            <textarea id="editNotes" rows="2" placeholder="Catatan untuk order ini"></textarea>
-          </div>
-          <div id="editItemsContainer" class="items-container"></div>
-          <button type="button" id="addEditItemBtn" class="secondary">
-            + Tambah Item
-          </button>
-          <div class="modal-actions">
-            <button type="submit">Simpan Perubahan</button>
-            <button type="button" id="cancelEditBtn" class="secondary">
-              Batal
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
     <div class="container">
       <h1>Summary Order</h1>
       <p class="desc">Ringkasan pesanan per batch.</p>
@@ -48,26 +24,49 @@
       <div id="alertError" class="alert error" role="alert" aria-live="assertive"></div>
       
       <div class="batch-controls">
-        <input
-          id="batch"
-          name="batch"
-          type="text"
-          placeholder="Contoh: B-2025-09-W3"
-          list="recentBatches"
-        />
+        <div class="batch-combobox">
+          <div class="combobox-container">
+            <input
+              id="batch"
+              name="batch"
+              type="text"
+              placeholder="Ketik atau pilih batch..."
+              class="combobox-input"
+            />
+            <button type="button" class="combobox-toggle" id="batchToggle">
+              ▼
+            </button>
+          </div>
+          <div class="combobox-dropdown" id="batchDropdown">
+            <!-- Opsi batch akan diisi oleh JavaScript -->
+          </div>
+        </div>
         <button type="button" id="generateBatchBtn" class="inline secondary">
           Batch Minggu Ini
         </button>
         <button type="button" id="loadBtn">Muat Summary</button>
       </div>
-      <datalist id="recentBatches"></datalist>
 
       <p class="caption" id="meta"></p>
-      
-      <!-- Size Summary -->
-      <div id="sizeSummary" class="size-summary hidden">
-        <div class="size-cards">
-          <!-- Cards akan diisi oleh JavaScript -->
+
+      <!-- Combined Summary Section -->
+      <div class="combined-summary">
+        <!-- Size Summary -->
+        <div id="sizeSummary" class="size-summary hidden">
+          <div class="size-cards">
+            <!-- Cards akan diisi oleh JavaScript -->
+          </div>
+        </div>
+        <!-- Revenue Summary Cards -->
+        <div class="revenue-summary">
+          <div class="summary-card">
+            <div class="label">Jumlah Order</div>
+            <div class="value" id="totalOrdersCard">0</div>
+          </div>
+          <div class="summary-card revenue-card">
+            <div class="label">Total Pendapatan</div>
+            <div class="value" id="totalRevenueCard">Rp 0</div>
+          </div>
         </div>
       </div>
       
@@ -86,6 +85,19 @@
       </div>
 
       <h2 class="section-title">Per Customer</h2>
+
+      <div class="mobile-sort-container" style="display: none;">
+        <select id="mobileSort" class="sort-select">
+          <option value="name-asc">Nama A-Z</option>
+          <option value="name-desc">Nama Z-A</option>
+          <option value="qty-desc">Total Botol ↓</option>
+          <option value="qty-asc">Total Botol ↑</option>
+          <option value="amount-desc">Total Tagihan ↓</option>
+          <option value="amount-asc">Total Tagihan ↑</option>
+          <option value="status">Status</option>
+        </select>
+      </div>
+
       <div class="table-wrapper">
         <table id="customersTable">
           <thead>
@@ -99,6 +111,77 @@
           </thead>
           <tbody></tbody>
         </table>
+      </div>
+
+      <!-- Mobile Customer Cards -->
+      <div id="mobileCustomerCards" class="mobile-customer-cards">
+        <!-- Customer cards akan diisi oleh JavaScript -->
+      </div>
+    </div>
+
+    <!-- Modal for Status Update -->
+    <div id="mobileStatusModal" class="mobile-status-modal">
+      <!-- Modal content will be filled by JavaScript -->
+    </div>
+
+    <!-- Modal for Edit Order -->
+    <div id="editOrderModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Order</h2>
+          <button type="button" class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        <form id="editOrderForm">
+          <div class="form-group">
+            <label for="editCustomerName">Nama Customer</label>
+            <input
+              type="text"
+              id="editCustomerName"
+              name="customerName"
+              required
+              readonly
+              class="readonly-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="editBatch">Batch</label>
+            <input
+              type="text"
+              id="editBatch"
+              name="batch"
+              required
+              readonly
+              class="readonly-input"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="editNotes">Catatan</label>
+            <textarea
+              id="editNotes"
+              name="notes"
+              rows="3"
+              placeholder="Catatan untuk order ini..."
+            ></textarea>
+          </div>
+
+          <fieldset class="items-fieldset">
+            <legend>Item Pesanan</legend>
+            <div id="editItemsContainer" class="items-container">
+              <!-- Item rows akan diisi oleh JavaScript -->
+            </div>
+            <button type="button" class="secondary" onclick="addEditItemRow()">
+              + Tambah Item
+            </button>
+            <small class="field-error" id="error-editItems"></small>
+          </fieldset>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Update Order</button>
+            <button type="button" class="btn-secondary" onclick="closeEditModal()">Batal</button>
+          </div>
+        </form>
       </div>
     </div>
 
