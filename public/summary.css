@@ -1,0 +1,164 @@
+/* Batch Controls */
+.batch-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+/* Size Summary Styling */
+.size-summary {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.size-summary.hidden {
+  display: none;
+}
+
+.size-cards {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.size-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  min-width: 65px;
+  max-width: 85px;
+}
+
+.size-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.size-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+
+.size-total {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.size-unit {
+  font-size: 0.625rem;
+  color: #9ca3af;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  margin: 40px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Mobile Responsive for Summary */
+@media (max-width: 640px) {
+  .batch-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .size-summary {
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .size-cards {
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .size-card {
+    padding: 4px 6px;
+    min-width: 45px;
+    max-width: 60px;
+  }
+
+  .size-total {
+    font-size: 0.75rem;
+  }
+
+  .size-label {
+    font-size: 0.5rem;
+  }
+
+  .size-unit {
+    font-size: 0.4rem;
+  }
+
+  /* Force size summary styling untuk mobile */
+  .size-summary {
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+  }
+
+  .size-cards {
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  .size-card {
+    padding: 4px 6px !important;
+    min-width: 45px !important;
+    max-width: 60px !important;
+  }
+
+  .size-total {
+    font-size: 0.75rem !important;
+  }
+
+  .size-label {
+    font-size: 0.5rem !important;
+  }
+
+  .size-unit {
+    font-size: 0.4rem !important;
+  }
+}

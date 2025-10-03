@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stok Jamu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/stock.css" />
+  </head>
+  <body>
+    <nav class="main-nav">
+      <a href="/index.html">Input Order</a>
+      <a href="/summary.html">Summary</a>
+      <a href="/stock.html" class="active">Stok</a>
+    </nav>
+    <div class="container">
+      <h1>Stok Jamu</h1>
+      <p class="desc">Manajemen stok produk jamu.</p>
+
+      <div id="alertSuccess" class="alert success" role="status" aria-live="polite"></div>
+      <div id="alertError" class="alert error" role="alert" aria-live="assertive"></div>
+
+      <!-- Ringkasan stok -->
+      <div id="stockSummary" class="stock-summary">
+        <div class="summary-card">
+          <div class="label">Total Jenis Produk</div>
+          <div class="value" id="totalProducts">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Total Stok</div>
+          <div class="value" id="totalStock">0</div>
+        </div>
+      </div>
+
+      <!-- Form kelola stok -->
+      <form id="stockForm" class="stock-form" novalidate>
+        <h2>Kelola Stok</h2>
+        <div class="grid">
+          <div>
+            <label for="jenisJamu">Jenis Jamu</label>
+            <select id="jenisJamu" name="jenisJamu" required>
+              <option value="">Pilih jenis</option>
+              <option value="kunyit asam">Kunyit Asam</option>
+              <option value="beras kencur">Beras Kencur</option>
+            </select>
+            <small class="field-error" id="error-jenisJamu"></small>
+          </div>
+          <div>
+            <label for="ukuran">Ukuran</label>
+            <select id="ukuran" name="ukuran" required>
+              <option value="">Pilih ukuran</option>
+              <option value="250ml">250ml</option>
+              <option value="600ml">600ml</option>
+              <option value="1L">1L</option>
+            </select>
+            <small class="field-error" id="error-ukuran"></small>
+          </div>
+          <div>
+            <label for="option">Opsi</label>
+            <select id="option" name="option" required>
+              <option value="normal">Normal</option>
+              <option value="less">Less</option>
+            </select>
+          </div>
+          <div>
+            <label for="qty">Jumlah</label>
+            <input
+              id="qty"
+              name="qty"
+              type="number"
+              min="1"
+              required
+              placeholder="Jumlah stok"
+            />
+            <small class="field-error" id="error-qty"></small>
+          </div>
+          <div>
+            <label for="notes">Catatan</label>
+            <input
+              id="notes"
+              name="notes"
+              type="text"
+              placeholder="Keterangan (opsional)"
+            />
+          </div>
+        </div>
+        <div class="stock-actions">
+          <button type="submit" name="action" value="add" class="btn-add">
+            ➕ Tambah Stok
+          </button>
+          <button type="submit" name="action" value="reduce" class="btn-reduce">
+            ➖ Kurangi Stok
+          </button>
+        </div>
+      </form>
+
+      <!-- Tampilan stok -->
+      <h2 class="section-title">Stok Tersedia</h2>
+      <div id="stockGroups"></div>
+
+      <!-- Tabel stok (hidden) -->
+      <table id="stockTable">
+        <thead>
+          <tr>
+            <th>Jenis Jamu</th>
+            <th>Ukuran</th>
+            <th>Opsi</th>
+            <th>Stok</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/stock.js"></script>
+  </body>
+</html>

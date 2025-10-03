@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Input Order Jamu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav class="main-nav">
+      <a href="/index.html" class="active">Input Order</a>
+      <a href="/summary.html">Summary</a>
+      <a href="/stock.html">Stok</a>
+    </nav>
+    
+    <div class="container">
+      <h1>Input Order Jamu</h1>
+      <p class="desc">Masukkan data order dan simpan.</p>
+
+      <div id="alertSuccess" class="alert success" role="status" aria-live="polite"></div>
+      <div id="alertError" class="alert error" role="alert" aria-live="assertive"></div>
+
+      <form id="orderForm" novalidate>
+        <div class="grid">
+          <div class="inputname full">
+            <label for="name">Nama</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              placeholder="Nama pemesan"
+              required
+              minlength="2"
+            />
+            <small class="field-error" id="error-name"></small>
+          </div>
+          
+          <div class="full">
+            <label for="batch">Batch</label>
+            <div class="batch-input-container">
+              <input
+                id="batch"
+                name="batch"
+                type="text"
+                placeholder="Contoh: B-2025-09-W3"
+                list="recentBatches"
+                required
+              />
+              <button type="button" id="generateBatchBtn" class="inline secondary">
+                Generate
+              </button>
+            </div>
+            <datalist id="recentBatches"></datalist>
+            <small class="field-error" id="error-batch"></small>
+          </div>
+        </div>
+
+        <div class="full">
+          <label for="notes">Catatan</label>
+          <textarea id="notes" name="notes" rows="2" placeholder="Catatan untuk order ini"></textarea>
+        </div>
+
+        <fieldset class="items-fieldset">
+          <legend>Item Pesanan</legend>
+          <div id="itemsContainer" class="items-container">
+            <!-- Item rows akan ditambahkan oleh JavaScript -->
+          </div>
+          <button type="button" id="addItemBtn" class="secondary">
+            + Tambah Item
+          </button>
+          <small class="field-error" id="error-items"></small>
+        </fieldset>
+
+        <div class="form-actions">
+          <button id="submitBtn" type="submit">Simpan Order</button>
+          <button type="reset" id="resetBtn" class="secondary">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

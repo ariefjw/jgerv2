@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Summary Batch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/summary.css" />
+  </head>
+  <body>
+    <nav class="main-nav">
+      <a href="/index.html">Input Order</a>
+      <a href="/summary.html" class="active">Summary</a>
+      <a href="/stock.html">Stok</a>
+    </nav>
+
+    <!-- Modal Edit Order -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <h2>Edit Order</h2>
+        <form id="editForm" novalidate>
+          <input type="hidden" id="editCustomerName" />
+          <div class="full">
+            <label for="editNotes">Catatan</label>
+            <textarea id="editNotes" rows="2" placeholder="Catatan untuk order ini"></textarea>
+          </div>
+          <div id="editItemsContainer" class="items-container"></div>
+          <button type="button" id="addEditItemBtn" class="secondary">
+            + Tambah Item
+          </button>
+          <div class="modal-actions">
+            <button type="submit">Simpan Perubahan</button>
+            <button type="button" id="cancelEditBtn" class="secondary">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Summary Order</h1>
+      <p class="desc">Ringkasan pesanan per batch.</p>
+
+      <div id="alertError" class="alert error" role="alert" aria-live="assertive"></div>
+      
+      <div class="batch-controls">
+        <input
+          id="batch"
+          name="batch"
+          type="text"
+          placeholder="Contoh: B-2025-09-W3"
+          list="recentBatches"
+        />
+        <button type="button" id="generateBatchBtn" class="inline secondary">
+          Batch Minggu Ini
+        </button>
+        <button type="button" id="loadBtn">Muat Summary</button>
+      </div>
+      <datalist id="recentBatches"></datalist>
+
+      <p class="caption" id="meta"></p>
+      
+      <!-- Size Summary -->
+      <div id="sizeSummary" class="size-summary hidden">
+        <div class="size-cards">
+          <!-- Cards akan diisi oleh JavaScript -->
+        </div>
+      </div>
+      
+      <div class="table-wrapper">
+        <table id="summaryTable">
+          <thead>
+            <tr>
+              <th>Jenis Jamu</th>
+              <th>Ukuran</th>
+              <th>Option</th>
+              <th>Jumlah</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 class="section-title">Per Customer</h2>
+      <div class="table-wrapper">
+        <table id="customersTable">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Total Botol</th>
+              <th>Total Tagihan</th>
+              <th>Status</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/summary.js"></script>
+  </body>
+</html>
