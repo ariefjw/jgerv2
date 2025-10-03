@@ -957,7 +957,8 @@ async function loadSummary(batch, forceReload = false) {
     }
 
     const res = await fetch(
-      "/api/summary?batch=" + encodeURIComponent(batch)
+      "/api/summary?batch=" + encodeURIComponent(batch),
+      { cache: 'no-store' }
     );
     const json = await res.json();
     if (!res.ok) throw new Error(json.message || "Gagal memuat summary");
@@ -965,7 +966,8 @@ async function loadSummary(batch, forceReload = false) {
 
     // Load customers summary & save to cache
     const res2 = await fetch(
-      "/api/summary/customers?batch=" + encodeURIComponent(batch)
+      "/api/summary/customers?batch=" + encodeURIComponent(batch),
+      { cache: 'no-store' }
     );
     const json2 = await res2.json();
     if (!res2.ok)
@@ -998,6 +1000,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const loadBtn = document.getElementById("loadBtn");
   const exportBtn = document.getElementById("exportBtn");
   const lastBatch = localStorage.getItem("lastBatch");
+  const navEntry = performance.getEntriesByType('navigation')[0];
+  const isReload = navEntry && navEntry.type === 'reload';
   
   // Setup custom combobox
   setupBatchCombobox();
@@ -1005,7 +1009,12 @@ window.addEventListener("DOMContentLoaded", () => {
   if (lastBatch) {
     batchInput.value = lastBatch;
     // Load initial data
-    loadSummary(lastBatch);
+    if (isReload) {
+      localStorage.removeItem("summaryData");
+      loadSummary(lastBatch, true);
+    } else {
+      loadSummary(lastBatch);
+    }
   }
 
   generateBtn.addEventListener("click", () => {
