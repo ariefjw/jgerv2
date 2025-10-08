@@ -269,7 +269,7 @@ class SheetsService {
 
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `${paymentsSheetName}!A:C`,
+        range: `${paymentsSheetName}!A:D`,
       });
 
       const values = res.data.values || [];
@@ -278,35 +278,48 @@ class SheetsService {
       // Skip header row
       const paymentsData = values.slice(1);
 
-      for (const row of paymentsData) {
-        const batch = String(row[0] || "").trim();
-        const name = String(row[1] || "").trim();
-        const status = String(row[2] || "")
-          .trim()
-          .toLowerCase();
+      // Kelompokkan berdasarkan batch dan name, ambil yang terbaru berdasarkan timestamp
+    const statusMap = new Map();
 
-        if (!batch || !name) continue;
+    paymentsData.forEach((row) => {
+      const batch = String(row[0] || "").trim();
+      const name = String(row[1] || "").trim();
+      const status = String(row[2] || "").trim().toLowerCase();
+      const timestamp = row[3] || "";
 
-        const key = `${batch}__${name.toLowerCase()}`;
-        map.set(key, status || "proses");
+      if (!batch || !name) return;
+
+      const key = `${batch}__${name.toLowerCase()}`;
+      
+      // Jika belum ada atau timestamp lebih baru, update status
+      if (!statusMap.has(key) || 
+          (timestamp && statusMap.get(key).timestamp < timestamp)) {
+        statusMap.set(key, {
+          status: status || "proses",
+          timestamp: timestamp
+        });
       }
+    });
 
-      console.log(`Loaded ${map.size} payment records`);
-      return map;
-    } catch (error) {
-      console.error("❌ Failed to get payments map:", error.message);
+    // Convert ke map sederhana untuk kompatibilitas
+    for (const [key, value] of statusMap.entries()) {
+      map.set(key, value.status);
+    }
 
-      if (error.message.includes("Unable to parse range")) {
-        console.log("Payments sheet might not exist, returning empty map");
-        return new Map();
-      }
+    console.log(`Loaded ${map.size} payment records`);
+    return map;
+  } catch (error) {
+    console.error("❌ Failed to get payments map:", error.message);
+
+    if (error.message.includes("Unable to parse range")) {
+      console.log("Payments sheet might not exist, returning empty map");
       return new Map();
     }
+    return new Map();
   }
+}
 
-  /**
-   * Set payment status in sheet - FIXED VERSION
-   */
+  /*Set payment status in sheet*/
   async setPayment(batch, name, status) {
     console.log("💳 setPayment called");
     try {
@@ -316,11 +329,16 @@ class SheetsService {
 
       console.log(`Setting payment status for ${name} (${batch}): ${status}`);
 
-      // First, get all current values
-      const res = await sheets.spreadsheets.values.get({
+      const timestamp = new Date().toISOString();
+      const res = await sheets.spreadsheets.values.append({
         spreadsheetId,
         range: `${paymentsSheetName}!A:D`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [[batch, name, status, timestamp]],
+        },
       });
+
 
       const values = res.data.values || [];
 

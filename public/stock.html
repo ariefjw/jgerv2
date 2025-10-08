@@ -22,16 +22,10 @@
 
       <div id="alertSuccess" class="alert success" role="status" aria-live="polite"></div>
       <div id="alertError" class="alert error" role="alert" aria-live="assertive"></div>
-
-      <!-- Ringkasan stok -->
-      <div id="stockSummary" class="stock-summary">
-        <div class="summary-card">
-          <div class="label">Total Jenis Produk</div>
-          <div class="value" id="totalProducts">0</div>
-        </div>
-        <div class="summary-card">
-          <div class="label">Total Stok</div>
-          <div class="value" id="totalStock">0</div>
+      
+      <div id="stockSummary" class="size-summary hidden">
+        <div class="size-cards">
+          <!-- Cards akan diisi oleh JavaScript -->
         </div>
       </div>
 
@@ -97,9 +91,11 @@
         </div>
       </form>
 
-      <!-- Tampilan stok -->
-      <h2 class="section-title">Stok Tersedia</h2>
-      <div id="stockGroups"></div>
+      <!-- History Input Stock -->
+      <h2 class="section-title">History Input Stock</h2>
+      <div id="stockHistory" class="stock-history">
+        <!-- History akan diisi oleh JavaScript -->
+      </div>
 
       <!-- Tabel stok (hidden) -->
       <table id="stockTable">

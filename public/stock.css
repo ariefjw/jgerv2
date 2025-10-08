@@ -27,6 +27,152 @@
   background: #dc2626 !important;
 }
 
+/* Size Summary (mirror from summary.css) */
+.size-summary {
+  display: flex;
+  flex: 1;
+  min-width: 200px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.size-summary.hidden {
+  display: none;
+}
+
+.size-cards {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.size-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 80px;
+}
+
+.size-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.size-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 3px;
+  line-height: 1;
+}
+
+.size-total {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.size-unit {
+  font-size: 0.75em;
+  color: #9ca3af;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 9px;
+}
+
+/* Rows per jenisJamu */
+.size-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.size-row-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.1em;
+  margin-bottom: 4px;
+  text-transform: capitalize;
+}
+
+.size-row-cards {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .size-row {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .size-row-cards {
+    gap: 8px;
+  }
+  
+  .size-card {
+    min-width: 100px;
+    padding: 12px 8px;
+  }
+  
+  .size-label {
+    font-size: 0.8em;
+  }
+  
+  .size-total {
+    font-size: 1.3em;
+  }
+  
+  .size-unit {
+    font-size: 0.7em;
+  }
+}
+
+@media (max-width: 480px) {
+  .size-row {
+    padding: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .size-row-cards {
+    gap: 6px;
+  }
+  
+  .size-card {
+    min-width: 80px;
+    padding: 10px 6px;
+  }
+  
+  .size-label {
+    font-size: 0.75em;
+  }
+  
+  .size-total {
+    font-size: 1.2em;
+  }
+  
+  .size-unit {
+    font-size: 0.65em;
+  }
+}
+
 /* Stock Summary */
 .stock-summary {
   display: flex;
@@ -148,5 +294,129 @@
 
   .stock-group {
     padding: 12px;
+  }
+}
+
+/* Stock History */
+.stock-history {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.history-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.history-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.history-action {
+  font-weight: 600;
+  font-size: 0.9em;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.history-action.add {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.history-action.reduce {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.history-date {
+  font-size: 0.85em;
+  color: #6b7280;
+}
+
+.history-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.history-product {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #111827;
+  text-transform: capitalize;
+}
+
+.product-details {
+  font-size: 0.9em;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.history-qty {
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.history-qty.positive {
+  color: #059669;
+}
+
+.history-qty.negative {
+  color: #dc2626;
+}
+
+.history-notes {
+  padding: 8px;
+  background: #f9fafb;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #4b5563;
+  border-left: 3px solid #3b82f6;
+}
+
+.no-data {
+  text-align: center;
+  color: #6b7280;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+/* Responsive History */
+@media (max-width: 640px) {
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .history-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .history-qty {
+    align-self: flex-end;
   }
 }
