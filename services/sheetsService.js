@@ -45,6 +45,7 @@ class SheetsService {
       console.log("ℹ️ Header Orders sheet sudah ada");
     }
   }
+
   /**
    * Ensure header row exists in Payments sheet
    */
@@ -91,25 +92,17 @@ class SheetsService {
   }
 
   /**
-   * Initialize authentication client - FIXED VERSION
+   * Initialize authentication client
    */
   async initializeAuth() {
-    if (this.authClient) {
-      return this.authClient;
-    }
+    if (this.authClient) return this.authClient;
 
     try {
-      // Only use environment variables
       const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
       const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
 
-      // Debug log
-      console.log("DEBUG EMAIL:", clientEmail);
-      console.log("DEBUG PRIVATE_KEY:", privateKey ? "Ada" : "Kosong");
-
       if (clientEmail && privateKey) {
         console.log("🔑 Using environment variables for Google Auth");
-        // Fix private key format
         const fixedKey = privateKey.replace(/\\n/g, "\n");
         const jwtClient = new google.auth.JWT({
           email: clientEmail,
@@ -121,9 +114,7 @@ class SheetsService {
         console.log("✅ JWT authentication successful");
         return this.authClient;
       }
-      throw new Error(
-        "No valid authentication method found. Please set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY in .env"
-      );
+      throw new Error("No valid authentication method found");
     } catch (error) {
       console.error("❌ Authentication failed:", error.message);
       throw error;
@@ -131,12 +122,10 @@ class SheetsService {
   }
 
   /**
-   * Get sheets client - FIXED VERSION
+   * Get sheets client
    */
   async getSheetsClient() {
-    if (this.sheetsClient) {
-      return this.sheetsClient;
-    }
+    if (this.sheetsClient) return this.sheetsClient;
 
     try {
       const authClient = await this.initializeAuth();
@@ -170,7 +159,7 @@ class SheetsService {
   }
 
   /**
-   * Append order to sheet - FIXED VERSION
+   * Append order to sheet
    */
   async appendOrder(name, batch, items, notes = "") {
     console.log("📝 appendOrder called");
@@ -209,7 +198,7 @@ class SheetsService {
   }
 
   /**
-   * Get all orders from sheet - FIXED VERSION
+   * Get all orders from sheet
    */
   async getAllOrders() {
     console.log("📖 getAllOrders called");
@@ -217,17 +206,12 @@ class SheetsService {
       const sheets = await this.getSheetsClient();
       const { spreadsheetId, ordersSheetName } = this.getConfig();
 
-      console.log(`Reading orders from sheet: ${ordersSheetName}`);
-
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range: `${ordersSheetName}!A:H`,
       });
 
       const values = res.data.values || [];
-      console.log(`Found ${values.length} rows in sheet`);
-
-      // Skip header row if exists
       const orders = values
         .slice(1)
         .map((row, idx) => ({
@@ -243,29 +227,21 @@ class SheetsService {
         }))
         .filter((r) => r.name && r.batch && r.jenisJamu);
 
-      console.log(`Processed ${orders.length} valid orders`);
       return orders;
     } catch (error) {
       console.error("❌ Failed to get orders:", error.message);
-
-      if (error.message.includes("Unable to parse range")) {
-        console.log("Sheet might be empty, returning empty array");
-        return [];
-      }
-      throw error;
+      return [];
     }
   }
 
   /**
-   * Get payments mapping from sheet - FIXED VERSION
+   * Get payments mapping from sheet
    */
   async getPaymentsMap() {
     console.log("💰 getPaymentsMap called");
     try {
       const sheets = await this.getSheetsClient();
       const { spreadsheetId, paymentsSheetName } = this.getConfig();
-
-      console.log(`Reading payments from sheet: ${paymentsSheetName}`);
 
       const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
@@ -275,111 +251,105 @@ class SheetsService {
       const values = res.data.values || [];
       const map = new Map();
 
-      // Skip header row
       const paymentsData = values.slice(1);
+      const statusMap = new Map();
 
-      // Kelompokkan berdasarkan batch dan name, ambil yang terbaru berdasarkan timestamp
-    const statusMap = new Map();
+      paymentsData.forEach((row) => {
+        const batch = String(row[0] || "").trim();
+        const name = String(row[1] || "").trim();
+        const status = String(row[2] || "").trim().toLowerCase();
+        const timestamp = row[3] || "";
 
-    paymentsData.forEach((row) => {
-      const batch = String(row[0] || "").trim();
-      const name = String(row[1] || "").trim();
-      const status = String(row[2] || "").trim().toLowerCase();
-      const timestamp = row[3] || "";
+        if (!batch || !name) return;
+        const key = `${batch}__${name.toLowerCase()}`;
 
-      if (!batch || !name) return;
+        if (
+          !statusMap.has(key) ||
+          (timestamp && statusMap.get(key).timestamp < timestamp)
+        ) {
+          statusMap.set(key, { status: status || "proses", timestamp });
+        }
+      });
 
-      const key = `${batch}__${name.toLowerCase()}`;
-      
-      // Jika belum ada atau timestamp lebih baru, update status
-      if (!statusMap.has(key) || 
-          (timestamp && statusMap.get(key).timestamp < timestamp)) {
-        statusMap.set(key, {
-          status: status || "proses",
-          timestamp: timestamp
-        });
+      for (const [key, value] of statusMap.entries()) {
+        map.set(key, value.status);
       }
-    });
 
-    // Convert ke map sederhana untuk kompatibilitas
-    for (const [key, value] of statusMap.entries()) {
-      map.set(key, value.status);
-    }
-
-    console.log(`Loaded ${map.size} payment records`);
-    return map;
-  } catch (error) {
-    console.error("❌ Failed to get payments map:", error.message);
-
-    if (error.message.includes("Unable to parse range")) {
-      console.log("Payments sheet might not exist, returning empty map");
+      return map;
+    } catch (error) {
+      console.error("❌ Failed to get payments map:", error.message);
       return new Map();
     }
-    return new Map();
   }
-}
 
-  /*Set payment status in sheet*/
+  /**
+   *  payment without deleting data
+   */
   async setPayment(batch, name, status) {
-    console.log("💳 setPayment called");
+    console.log("💳 setPayment (update only) called");
     try {
       await this.ensurePaymentsHeader();
       const sheets = await this.getSheetsClient();
       const { spreadsheetId, paymentsSheetName } = this.getConfig();
-
-      console.log(`Setting payment status for ${name} (${batch}): ${status}`);
-
-      const timestamp = new Date().toISOString();
-      const res = await sheets.spreadsheets.values.append({
+  
+      // Ambil semua data
+      const res = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range: `${paymentsSheetName}!A:D`,
-        valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values: [[batch, name, status, timestamp]],
-        },
       });
-
-
+  
       const values = res.data.values || [];
-
-      // Find existing entries for this batch and name
-      const updatedValues = values.filter((row) => {
-        const rowBatch = String(row[0] || "").trim();
-        const rowName = String(row[1] || "").trim();
-        return !(
-          rowBatch === batch && rowName.toLowerCase() === name.toLowerCase()
-        );
+      const header = values[0] || ["batch", "name", "status", "timestamp"];
+      const data = values.slice(1);
+  
+      const key = `${batch}__${name.toLowerCase()}`;
+      const now = new Date().toISOString();
+  
+      let foundRowIndex = -1;
+  
+      // Cari baris yang cocok
+      data.forEach((row, idx) => {
+        const [b, n] = [String(row[0] || "").trim(), String(row[1] || "").trim().toLowerCase()];
+        if (`${b}__${n}` === key) {
+          foundRowIndex = idx + 2; // +2 karena baris pertama header (A1:D1)
+        }
       });
-
-      // Add new status entry
-      updatedValues.push([batch, name, status, new Date().toISOString()]);
-
-      // Clear entire sheet
-      await sheets.spreadsheets.values.clear({
-        spreadsheetId,
-        range: `${paymentsSheetName}!A:D`,
-      });
-
-      // Write all values back
-      const response = await sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: `${paymentsSheetName}!A:D`,
-        valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values: updatedValues,
-        },
-      });
-
-      console.log("✅ Payment status updated successfully");
-      return response.data;
+  
+      if (foundRowIndex > 0) {
+        // ✅ Jika ketemu, update langsung kolom status dan timestamp
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${paymentsSheetName}!C${foundRowIndex}:D${foundRowIndex}`,
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: [[status, now]],
+          },
+        });
+  
+        console.log(`✅ Updated existing payment row ${foundRowIndex}`);
+      } else {
+        // 🆕 Jika belum ada, tambahkan baris baru
+        await sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range: `${paymentsSheetName}!A:D`,
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: [[batch, name, status, now]],
+          },
+        });
+  
+        console.log("🆕 Added new payment entry");
+      }
+  
+      return true;
     } catch (error) {
-      console.error("❌ Failed to set payment:", error.message);
+      console.error("❌ Failed to set payment (update only):", error.message);
       throw error;
     }
   }
 
   /**
-   * Test connection to Google Sheets
+   * Test connection
    */
   async testConnection() {
     console.log("🔌 testConnection called");
@@ -427,8 +397,8 @@ class SheetsService {
               "ukuran",
               "option",
               "qty",
-              "type", // 'in' untuk stok masuk, 'out' untuk pengurangan stok
-              "notes", // batch number untuk out, atau keterangan untuk in
+              "type",
+              "notes",
             ],
           ],
         },
@@ -452,9 +422,8 @@ class SheetsService {
       });
 
       const values = res.data.values || [];
-      const stockMap = new Map(); // key: jenisJamu__ukuran__option
+      const stockMap = new Map();
 
-      // Skip header row
       values.slice(1).forEach((row) => {
         const jenisJamu = String(row[1] || "");
         const ukuran = String(row[2] || "");
@@ -466,19 +435,15 @@ class SheetsService {
 
         const key = `${jenisJamu}__${ukuran}__${option}`;
         const currentStock = stockMap.get(key) || 0;
-
-        // Add for stock in, subtract for stock out
         stockMap.set(key, currentStock + (type === "in" ? qty : -qty));
       });
 
-      // Convert to array
       const stocks = [];
       for (const [key, qty] of stockMap.entries()) {
         const [jenisJamu, ukuran, option] = key.split("__");
         stocks.push({ jenisJamu, ukuran, option, qty });
       }
 
-      console.log(`Loaded ${stocks.length} stock items`);
       return stocks;
     } catch (error) {
       console.error("❌ Failed to get stock levels:", error.message);
@@ -496,13 +461,11 @@ class SheetsService {
       const sheets = await this.getSheetsClient();
       const { spreadsheetId, ordersSheetName } = this.getConfig();
 
-      // Clear existing orders
       await sheets.spreadsheets.values.clear({
         spreadsheetId,
         range: `${ordersSheetName}!A2:H`,
       });
 
-      // Write header and orders
       await sheets.spreadsheets.values.update({
         spreadsheetId,
         range: `${ordersSheetName}!A2:H`,
@@ -512,11 +475,11 @@ class SheetsService {
             order.timestamp,
             order.name,
             order.batch,
-            String(order.jenisJamu || ""),
-            String(order.ukuran || ""),
-            String(order.option || ""),
+            order.jenisJamu,
+            order.ukuran,
+            order.option,
             Number(order.qty || 0),
-            String(order.notes || ""),
+            order.notes,
           ]),
         },
       });
@@ -530,7 +493,7 @@ class SheetsService {
   }
 
   /**
-   * Add stock entry (in/out)
+   * Add stock entry
    */
   async addStockEntry(jenisJamu, ukuran, option, qty, type, notes) {
     console.log("📥 addStockEntry called");
@@ -558,5 +521,4 @@ class SheetsService {
   }
 }
 
-// Ekspor class
 module.exports = SheetsService;
