@@ -821,3 +821,65 @@ table tbody td {
     display: none !important;
   }
 }
+
+/*History card*/
+.history-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  background: #f9fafb;
+  border-left: 3px solid #d1d5db;
+  font-size: 13px;
+  line-height: 1.2;
+  transition: background 0.2s ease;
+}
+
+.history-card:hover {
+  background: #f3f4f6;
+}
+
+.history-card.add {
+  border-left-color: #10b981; /* hijau */
+}
+
+.history-card.reduce {
+  border-left-color: #ef4444; /* merah */
+}
+
+.history-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-line.small {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.history-line.notes {
+  font-size: 12px;
+  color: #374151;
+  font-style: italic;
+}
+
+.jamuname {
+  font-weight: 600;
+  color: #111827;
+}
+
+.qty {
+  font-weight: 600;
+}
+
+.qty.positive {
+  color: #059669;
+}
+
+.qty.negative {
+  color: #dc2626;
+}

@@ -59,40 +59,72 @@ async function loadStockHistory() {
   }
 }
 
+// Load stock history terpisah: In dan Out
+async function loadStockHistorySplit() {
+  try {
+    const res = await fetch("/api/stock/history");
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Gagal memuat history stok");
+
+    const inHistory = json.history.filter(h => h.action === "add");
+    const outHistory = json.history.filter(h => h.action === "reduce");
+
+    renderStockHistory(inHistory, "stockInHistory");
+    renderStockHistory(outHistory, "stockOutHistory");
+  } catch (err) {
+    console.error("Error loading split history:", err);
+    document.getElementById("stockInHistory").innerHTML =
+      '<p class="no-data">Gagal memuat history stok masuk</p>';
+    document.getElementById("stockOutHistory").innerHTML =
+      '<p class="no-data">Gagal memuat history stok keluar</p>';
+  }
+}
+
 // Function to render stock history
-function renderStockHistory(history) {
-  const container = document.getElementById("stockHistory");
+function renderStockHistory(history, targetId = "stockHistory") {
+  const container = document.getElementById(targetId);
   if (!container) return;
 
   if (!Array.isArray(history) || history.length === 0) {
-    container.innerHTML = '<p class="no-data">Belum ada history input stok</p>';
+    container.innerHTML = '<p class="no-data">Belum ada data</p>';
     return;
   }
 
-  const historyHTML = history.map(record => `
-    <div class="history-card">
-      <div class="history-header">
-        <div class="history-action ${record.action === 'add' ? 'add' : 'reduce'}">
-          ${record.action === 'add' ? '➕ Tambah' : '➖ Kurangi'}
+  // Ambil 7 data terbaru
+  const latest = history.slice(0, 7);
+
+  const historyHTML = latest.map(record => {
+    const isAdd = record.action === "add";
+    const symbol = isAdd ? "+" : "−";
+    const qtyClass = isAdd ? "positive" : "negative";
+    const borderClass = isAdd ? "add" : "reduce";
+
+    const date = new Date(record.createdAt);
+    const formattedDate = date.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return `
+      <div class="history-card ${borderClass}">
+        <div class="history-line">
+          <span class="jamuname">${record.jenisJamu}</span>
+          <span class="qty ${qtyClass}">${symbol}${record.qty}</span>
         </div>
-        <div class="history-date">${formatHistoryDate(record.createdAt)}</div>
+        <div class="history-line small">
+          <span>${record.ukuran} • ${record.option}</span>
+          <span>${formattedDate}</span>
+        </div>
+        ${record.notes ? `
+          <div class="history-line notes">
+            <span>${record.notes}</span>
+          </div>
+        ` : ""}
       </div>
-      <div class="history-content">
-        <div class="history-product">
-          <span class="product-name">${record.jenisJamu}</span>
-          <span class="product-details">${record.ukuran} • ${record.option}</span>
-        </div>
-        <div class="history-qty ${record.action === 'add' ? 'positive' : 'negative'}">
-          ${record.action === 'add' ? '+' : '-'}${record.qty}
-        </div>
-      </div>
-      ${record.notes ? `
-        <div class="history-notes">
-          <strong>Catatan:</strong> ${record.notes}
-        </div>
-      ` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join("");
 
   container.innerHTML = historyHTML;
 }
@@ -143,7 +175,7 @@ async function loadStocks() {
     
     // Load stock history
     loadStockHistory();
-
+    loadStockHistorySplit();
   } catch (err) {
     const alertError = document.getElementById("alertError");
     show(alertError, err.message);

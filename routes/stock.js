@@ -93,4 +93,61 @@ router.post("/reduce", async (req, res) => {
   }
 });
 
+// Get stock history
+router.get("/history", async (req, res) => {
+  try {
+    const history = await sheetsService.getStockHistory();
+    res.json({ history });
+  } catch (err) {
+    console.error("Error getting stock history:", err);
+    res.status(500).json({ message: "Gagal memuat history stok." });
+  }
+});
+
+router.post("/status", async (req, res) => {
+  try {
+    const { id, status } = req.body;
+    if (!id || !status) return res.status(400).json({ message: "ID dan status wajib diisi." });
+
+    const order = await sheetsService.getOrderById(id);
+    if (!order) return res.status(404).json({ message: "Order tidak ditemukan." });
+
+    // Validasi transisi status
+    const validTransitions = {
+      proses: ["packing"],
+      packing: ["scheduled", "delivered"],
+      scheduled: ["delivered"],
+      delivered: ["paid"],
+      paid: [],
+    };
+
+    if (!validTransitions[order.status]?.includes(status)) {
+      return res.status(400).json({ message: `Transisi tidak valid dari ${order.status} ke ${status}.` });
+    }
+
+    // Jika masuk status packing → kurangi stok
+    if (status === "packing") {
+      for (const item of order.items) {
+        await sheetsService.addStockEntry(
+          item.jenisJamu,
+          item.ukuran,
+          item.option || "normal",
+          item.qty,
+          "out",
+          `Order ${order.customerName}`
+        );
+      }
+    }
+
+    // Update status di Google Sheet
+    await sheetsService.updateOrderStatus(id, status);
+
+    res.json({ success: true, message: `Status order diperbarui ke ${status}`, newStatus: status });
+  } catch (err) {
+    console.error("Error updating order status:", err);
+    res.status(500).json({ message: "Gagal memperbarui status order." });
+  }
+});
+
+
 module.exports = router;

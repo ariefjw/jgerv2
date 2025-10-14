@@ -46,6 +46,35 @@ function loadEditOrderData() {
   return true;
 }
 
+function showStatusOptions(currentStatus) {
+  const nextOptions = {
+    proses: ['packing'],
+    packing: ['scheduled', 'delivered'],
+    scheduled: ['delivered'],
+    delivered: ['paid'],
+    paid: []
+  };
+  const container = document.querySelector('.mobile-status-options');
+  const opts = nextOptions[currentStatus] || [];
+  container.innerHTML = opts.length
+    ? opts.map(s => `<div class="mobile-status-option" data-status="${s}">${s}</div>`).join('')
+    : '<p class="text-center text-gray-500">Tidak ada status lanjutan</p>';
+}
+
+async function refreshStockSummary() {
+  try {
+    const res = await fetch("/api/stock");
+    const data = await res.json();
+    if (data.stocks) {
+      document.querySelector("#totalStock").textContent = data.stocks.reduce((a, b) => a + b.qty, 0);
+      // Update elemen lainnya sesuai HTML-mu
+    }
+  } catch (err) {
+    console.error("Gagal refresh stok:", err);
+  }
+}
+
+
 // Function to handle edit order submission
 async function submitEditOrder(formData) {
   try {
@@ -89,6 +118,57 @@ window.addEventListener("DOMContentLoaded", () => {
   const generateBatchBtn = document.getElementById("generateBatchBtn");
   const batchInput = document.getElementById("batch");
   const notesInput = document.getElementById("notes");
+  const modal = document.querySelector('.mobile-status-modal');
+  const confirmBtn = document.querySelector('.mobile-modal-confirm');
+  const cancelBtn = document.querySelector('.mobile-modal-cancel');
+  let selectedStatus = null;
+  let currentOrderId = null;
+
+  document.querySelectorAll('.btn-status').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentOrderId = btn.dataset.id;
+      const currentStatus = btn.dataset.status;
+      showStatusOptions(currentStatus); // tampilkan hanya opsi yang valid
+      modal.style.display = 'flex';
+    });
+  });
+
+  // Event listener untuk memilih status
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('mobile-status-option')) {
+      document.querySelectorAll('.mobile-status-option').forEach(o => o.classList.remove('selected'));
+      e.target.classList.add('selected');
+      selectedStatus = e.target.dataset.status;
+    }
+  });
+
+  // Konfirmasi update status
+  confirmBtn.addEventListener('click', async () => {
+    if (!selectedStatus) return alert("Pilih status terlebih dahulu.");
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = "Updating...";
+
+    try {
+      const res = await fetch("/api/orders/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: currentOrderId, status: selectedStatus }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message);
+
+      modal.style.display = 'none';
+      refreshStockSummary(); // update stok otomatis
+      alert(result.message);
+    } catch (err) {
+      alert("Gagal update status: " + err.message);
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Konfirmasi";
+    }
+  });
+
+  cancelBtn.addEventListener('click', () => (modal.style.display = 'none'));
 
   // Cek apakah ada data edit
   const isEditMode = loadEditData();

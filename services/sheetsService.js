@@ -519,6 +519,41 @@ class SheetsService {
       throw error;
     }
   }
+
+  /**
+ * Ambil seluruh riwayat stok dari Google Sheets
+ */
+async getStockHistory() {
+  try {
+    const sheets = await this.getSheetsClient();
+    const { spreadsheetId, stocksSheetName } = this.getConfig();
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${stocksSheetName}!A2:G`,
+    });
+
+    const rows = res.data.values || [];
+    const history = rows
+      .filter(r => r.length >= 6)
+      .map(r => ({
+        createdAt: r[0],               // timestamp
+        jenisJamu: r[1],               // Kunyit Asam / Beras Kencur
+        ukuran: r[2],
+        option: r[3],
+        qty: Number(r[4] || 0),
+        action: r[5] === "in" ? "add" : "reduce", // konversi untuk frontend
+        notes: r[6] || "",
+      }))
+      .reverse(); // terbaru di atas
+
+    return history;
+  } catch (err) {
+    console.error("❌ Gagal membaca stock history:", err);
+    throw err;
+  }
 }
+}
+
 
 module.exports = SheetsService;
