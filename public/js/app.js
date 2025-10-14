@@ -1,4 +1,6 @@
-//Utility: Refresh Stock Summary
+// =====================================================
+// 🧠 Utility: Refresh Stock Summary
+// =====================================================
 async function refreshStockSummary() {
   try {
     const res = await fetch("/api/stock");
@@ -11,26 +13,27 @@ async function refreshStockSummary() {
   }
 }
 
-// Utility: Status Transition Options
-function showStatusOptions(currentStatus) {
+// =====================================================
+// 🧠 Utility: Tentukan status berikutnya
+// =====================================================
+function getNextStatus(currentStatus) {
   const nextOptions = {
-    proses: ['packing'],
-    packing: ['scheduled', 'delivered'],
-    scheduled: ['delivered'],
-    delivered: ['paid'],
-    paid: []
+    proses: "packing",
+    packing: "scheduled",
+    scheduled: "delivered",
+    delivered: "paid",
+    paid: null,
   };
-  const container = document.querySelector('.mobile-status-options');
-  const opts = nextOptions[currentStatus] || [];
-  if (!container) return;
-  container.innerHTML = opts.length
-    ? opts.map(s => `<div class="mobile-status-option" data-status="${s}">${s}</div>`).join('')
-    : '<p class="text-center text-gray-500">Tidak ada status lanjutan</p>';
+  return nextOptions[currentStatus] || null;
 }
 
-// DOM Ready
+// =====================================================
+// 🚀 DOM Ready
+// =====================================================
 window.addEventListener("DOMContentLoaded", () => {
-  //Bagian 1: FORM ORDER (Halaman Tambah/Edit Order)
+  // =====================================================
+  // 🧩 Bagian 1: FORM ORDER (Halaman Tambah/Edit Order)
+  // =====================================================
   const orderForm = document.getElementById("orderForm");
   if (orderForm) {
     const form = orderForm;
@@ -102,9 +105,9 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       const isEditMode = loadEditData();
-      const confirmMessage = isEditMode ?
-        `Update order ${data.name}?` :
-        formatOrderSummary(data);
+      const confirmMessage = isEditMode
+        ? `Update order ${data.name}?`
+        : formatOrderSummary(data);
 
       if (!confirm(confirmMessage)) return;
 
@@ -125,7 +128,10 @@ window.addEventListener("DOMContentLoaded", () => {
           if (!res.ok) throw new Error(result.message || "Gagal menyimpan");
         }
 
-        show(alertSuccess, result.message || (isEditMode ? "Berhasil diupdate" : "Berhasil disimpan"));
+        show(
+          alertSuccess,
+          result.message || (isEditMode ? "Berhasil diupdate" : "Berhasil disimpan")
+        );
         form.reset();
         itemsContainer.innerHTML = "";
         itemsContainer.appendChild(createItemRow(0));
@@ -133,7 +139,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (isEditMode) {
           clearEditData();
           submitBtn.textContent = "Simpan Order";
-          submitBtn.style.background = '';
+          submitBtn.style.background = "";
         }
 
         // Notifikasi antar-tab
@@ -147,65 +153,129 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  //Bagian 2: MOBILE STATUS MODAL (Halaman Summary)
-  const modal = document.querySelector('.mobile-status-modal');
-  if (modal) {
-    const confirmBtn = document.querySelector('.mobile-modal-confirm');
-    const cancelBtn = document.querySelector('.mobile-modal-cancel');
-    let selectedStatus = null;
-    let currentOrderId = null;
+  // =====================================================
+  // 🧩 Bagian 2: UPDATE STATUS LANGSUNG (Desktop & Mobile)
+  // =====================================================
+  function getNextOptions(currentStatus) {
+  const options = {
+    proses: ["packing"],
+    packing: ["scheduled", "delivered"],
+    scheduled: ["delivered"],
+    delivered: ["paid"],
+    paid: [],
+  };
+  return options[currentStatus] || [];
+}
 
-    // Klik tombol status (btn-status)
-    document.querySelectorAll('.btn-status').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentOrderId = btn.dataset.id;
-        const currentStatus = btn.dataset.status;
-        showStatusOptions(currentStatus);
-        modal.style.display = 'flex';
-      });
-    });
+// Delegasi klik agar tetap jalan meski tombol muncul belakangan
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-status, .mobile-btn-status");
+  if (!btn) return;
 
-    // Pilih status
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('mobile-status-option')) {
-        document.querySelectorAll('.mobile-status-option').forEach(o => o.classList.remove('selected'));
-        e.target.classList.add('selected');
-        selectedStatus = e.target.dataset.status;
-      }
-    });
+  const orderId = btn.dataset.id;
+  const currentStatus = btn.dataset.status;
+  const nextOptions = getNextOptions(currentStatus);
 
-    // Konfirmasi update
-    confirmBtn.addEventListener('click', async () => {
-      if (!selectedStatus) return alert("Pilih status terlebih dahulu.");
-      confirmBtn.disabled = true;
-      confirmBtn.textContent = "Updating...";
+  // Mode mobile (<=768px)
+  const isMobile = window.innerWidth <= 768;
+
+  // ==============================
+  // 📱 MOBILE MODE: Tampilkan <select>
+  // ==============================
+  if (isMobile) {
+    // Jangan buat select kalau sudah ada
+    if (btn.nextElementSibling?.classList.contains("statusSelect")) return;
+
+    if (nextOptions.length === 0) {
+      alert("Status sudah final dan tidak bisa diubah lagi.");
+      return;
+    }
+
+    const select = document.createElement("select");
+    select.className = "statusSelect";
+    select.innerHTML = `
+      <option value="">Pilih status...</option>
+      ${nextOptions.map((s) => `<option value="${s}">${s}</option>`).join("")}
+    `;
+
+    btn.insertAdjacentElement("afterend", select);
+
+    select.addEventListener("change", async () => {
+      const selectedStatus = select.value;
+      if (!selectedStatus) return;
+
+      if (!confirm(`Ubah status dari ${currentStatus} → ${selectedStatus}?`))
+        return;
+
+      select.disabled = true;
 
       try {
         const res = await fetch("/api/orders/status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: currentOrderId, status: selectedStatus }),
+          body: JSON.stringify({ id: orderId, status: selectedStatus }),
         });
 
         const result = await res.json();
         if (!res.ok) throw new Error(result.message);
 
-        modal.style.display = 'none';
         alert(result.message);
-        if (result.newStatus === 'packing') refreshStockSummary();
+        btn.textContent = selectedStatus;
+        btn.dataset.status = selectedStatus;
+        select.remove();
+
+        if (selectedStatus === "packing") refreshStockSummary();
         localStorage.setItem("orderUpdated", new Date().toISOString());
       } catch (err) {
         alert("Gagal update status: " + err.message);
-      } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.textContent = "Konfirmasi";
+        select.disabled = false;
       }
     });
-
-    cancelBtn.addEventListener('click', () => (modal.style.display = 'none'));
+    return;
   }
 
-  //Sinkronisasi Stok Antar-Tab
+  // ==============================
+  // 💻 DESKTOP MODE: Update langsung
+  // ==============================
+  const nextStatus = nextOptions[0];
+  if (!nextStatus) {
+    alert("Status sudah final dan tidak bisa diubah lagi.");
+    return;
+  }
+
+  if (!confirm(`Ubah status dari ${currentStatus} → ${nextStatus}?`)) return;
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Updating...";
+
+  try {
+    const res = await fetch("/api/orders/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: orderId, status: nextStatus }),
+    });
+
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message);
+
+    alert(result.message);
+    btn.textContent = nextStatus;
+    btn.dataset.status = nextStatus;
+
+    if (nextStatus === "packing") refreshStockSummary();
+    localStorage.setItem("orderUpdated", new Date().toISOString());
+  } catch (err) {
+    alert("Gagal update status: " + err.message);
+    btn.textContent = originalText;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+  // =====================================================
+  // 🧩 Sinkronisasi Stok Antar-Tab
+  // =====================================================
   window.addEventListener("storage", (e) => {
     if (e.key === "orderUpdated") {
       refreshStockSummary();

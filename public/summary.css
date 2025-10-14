@@ -583,14 +583,14 @@
   padding: 20px;
 }
 
-.mobile-status-modal-content {
+/* .mobile-status-modal-content {
   background: white;
   border-radius: 12px;
   padding: 20px;
   width: 100%;
   max-width: 300px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
+} */
 
 .mobile-status-modal-title {
   font-weight: 600;
@@ -1019,3 +1019,48 @@
     justify-content: center;
   }
 }
+
+.btn-status {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  transition: all 0.2s ease;
+}
+
+.btn-status:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .btn-status {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .action-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-edit, .btn-view, .btn-status {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    min-width: 60px;
+  }
+
+  /* Hilangkan modal lama */
+.mobile-status-modal {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+}
+
