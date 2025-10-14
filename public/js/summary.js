@@ -503,6 +503,7 @@ async function loadSummary(batch, forceReload = false) {
     const json2 = await res2.json();
     if (!res2.ok) throw new Error(json2.message || "Gagal memuat summary customer");
     renderCustomers(json2);
+    updateRevenueSummary(json2);
     setupEventHandlers();
     setupDesktopStatusSelects();
     setupMobileStatusSelects();
