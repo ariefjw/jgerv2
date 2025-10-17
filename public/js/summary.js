@@ -89,10 +89,11 @@ function setupBatchCombobox() {
     batchDropdown.classList.toggle('show', isDropdownOpen);
   });
 
-  document.addEventListener('click', function(event) {
-    if (!batchInput.contains(event.target) && !batchToggle.contains(event.target) && !batchDropdown.contains(event.target)) {
-      batchDropdown.classList.remove('show');
-      isDropdownOpen = false;
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("btn-detail")) {
+      const name = e.target.dataset.name;
+      const batch = document.getElementById("batchSelect").value;
+      showCustomerDetail(batch, name);
     }
   });
 
@@ -350,7 +351,7 @@ function renderMobileCustomerCards(customers) {
               </select>
             </div>
             <button class="btn-edit" onclick="editCustomerOrder('${customer.name}')" ${!canEdit ? 'style="display:none"' : ''}>Edit</button>
-            <button class="btn-view" onclick="toggleCustomerDetails('${customer.name}')">Detail</button>
+            <button class="btn-view" onclick="toggleCustomerDetails('${customer.name}', event)">Detail</button>
           </div>
         </div>
         <div class="mobile-card-details" id="details-${customer.name.replace(/\s+/g, '-')}">
@@ -372,13 +373,23 @@ function renderMobileCustomerCards(customers) {
   setupEventHandlers();
 }
 
-function toggleCustomerDetails(customerName) {
+function toggleCustomerDetails(customerName, event) {
   const safeId = customerName.replace(/\s+/g, '-');
-  const details = document.getElementById(`details-${safeId}`);
-  const button = event.target;
-  const isVisible = details.style.display === 'block';
-  details.style.display = isVisible ? 'none' : 'block';
-  button.textContent = isVisible ? 'Detail' : 'Tutup';
+  const detailsElement = document.getElementById(`details-${safeId}`);
+  const button = event.currentTarget;
+
+  if (!detailsElement) {
+    console.warn(`Tidak menemukan detail element untuk ${safeId}`);
+    return;
+  }
+
+  if (detailsElement.style.display === 'block') {
+    detailsElement.style.display = 'none';
+    button.textContent = 'Detail';
+  } else {
+    detailsElement.style.display = 'block';
+    button.textContent = 'Tutup';
+  }
 }
 
 // Event handlers
