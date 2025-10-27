@@ -6,7 +6,8 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["serverless-http", "express", "cors", "body-parser", "dotenv"]
+  external_node_modules = ["serverless-http", "express", "cors", "body-parser", "dotenv", "googleapis", "google-auth-library"]
+  included_files = ["routes/**", "services/**", "middleware/**"]
 
 [[redirects]]
   from = "/api/*"
