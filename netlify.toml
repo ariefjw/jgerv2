@@ -1,6 +1,13 @@
 [build]
-  command = "npm run build"
-  publish = "/build"
+  publish = "public"
+
 
 [functions]
   directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["serverless-http", "express", "cors", "body-parser", "dotenv"]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
